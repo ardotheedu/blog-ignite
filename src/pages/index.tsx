@@ -16,7 +16,7 @@ interface Post {
   first_publication_date: string | null;
   data: {
     title: string;
-    subtitle: string;
+    subtitle: string | null;
     author: string;
   };
 }
@@ -32,7 +32,7 @@ interface HomeProps {
 
 export default function Home({ postsPagination }: HomeProps) {
   return (
-    <main className={styles.container}>
+    <main className={commonStyles.container}>
       <div className={styles.posts}>
         {postsPagination.results.map(post => (
           <Link href={`/posts/${post.uid}`}>
@@ -61,11 +61,10 @@ export const getStaticProps: GetStaticProps = async () => {
   const postsResponse = await prismic.query(
     [Prismic.predicates.at('document.type', 'post')],
     {
-      fetch: ['post.title', 'post.content'],
-      pageSize: 100,
+      fetch: ['post.title', 'post.subtitle', 'post.author'],
+      pageSize: 2,
     }
   );
-
   const posts = postsResponse.results.map(post => {
     return {
       uid: post.uid,
@@ -73,19 +72,23 @@ export const getStaticProps: GetStaticProps = async () => {
         locale: ptBR,
       }),
       data: {
-        title: RichText.asText(post.data.title),
-        subtitle: RichText.asText(post.data.subtitle),
-        author: RichText.asText(post.data.author),
+        title: post.data.title,
+        subtitle: post.data.subtitle,
+        author: post.data.author,
       },
     };
   });
 
   const { next_page } = postsResponse;
 
+  const postsPagination: PostPagination = {
+    next_page,
+    results: posts,
+  };
+
   return {
     props: {
-      posts,
-      next_page,
+      postsPagination,
     },
   };
 };
