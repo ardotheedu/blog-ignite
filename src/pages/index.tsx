@@ -2,10 +2,11 @@ import { GetStaticProps } from 'next';
 import Link from 'next/link';
 
 import Prismic from '@prismicio/client';
-import { RichText } from 'prismic-dom';
 
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
+import { FiCalendar } from 'react-icons/fi';
+import { FiUser } from 'react-icons/fi';
 import { getPrismicClient } from '../services/prismic';
 
 import commonStyles from '../styles/common.module.scss';
@@ -40,18 +41,20 @@ export default function Home({ postsPagination }: HomeProps) {
               <strong>{post.data.title}</strong>
               <p>{post.data.subtitle}</p>
               <div>
-                <div>
+                <div className={styles.info}>
+                  <FiCalendar size={20} />
                   <time>{post.first_publication_date}</time>
                 </div>
-                <div>
-                  <p>{post.data.subtitle}</p>
+                <div className={styles.info}>
+                  <FiUser size={20} />
+                  <p>{post.data.author}</p>
                 </div>
               </div>
             </a>
           </Link>
         ))}
+        <a className={styles.carregarPosts}>Carregar mais posts</a>
       </div>
-      <a key={postsPagination.next_page}>carregar mais posts</a>
     </main>
   );
 }
@@ -68,9 +71,13 @@ export const getStaticProps: GetStaticProps = async () => {
   const posts = postsResponse.results.map(post => {
     return {
       uid: post.uid,
-      first_publication_date: format(new Date(), post.first_publication_date, {
-        locale: ptBR,
-      }),
+      first_publication_date: format(
+        new Date(post.first_publication_date),
+        'dd MMM yyyy',
+        {
+          locale: ptBR,
+        }
+      ),
       data: {
         title: post.data.title,
         subtitle: post.data.subtitle,
@@ -80,6 +87,8 @@ export const getStaticProps: GetStaticProps = async () => {
   });
 
   const { next_page } = postsResponse;
+
+  console.log(next_page);
 
   const postsPagination: PostPagination = {
     next_page,
