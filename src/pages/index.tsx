@@ -5,8 +5,8 @@ import Prismic from '@prismicio/client';
 
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
-import { FiCalendar } from 'react-icons/fi';
-import { FiUser } from 'react-icons/fi';
+import { FiCalendar, FiUser } from 'react-icons/fi';
+import { useState } from 'react';
 import { getPrismicClient } from '../services/prismic';
 
 import commonStyles from '../styles/common.module.scss';
@@ -32,18 +32,53 @@ interface HomeProps {
 }
 
 export default function Home({ postsPagination }: HomeProps) {
+  const [posts, setPosts] = useState<PostPagination>(postsPagination);
+
+  async function handleLoadMorePosts() {
+    try {
+      const response = await fetch(postsPagination.next_page);
+      const { results, next_page } = await response.json();
+
+      const data = results.map((post: Post) => ({
+        uid: post.uid,
+        first_publication_date: post.first_publication_date,
+        data: {
+          title: post.data.title,
+          subtitle: post.data.subtitle,
+          author: post.data.author,
+        },
+      }));
+
+      setPosts(state => {
+        return {
+          results: [...state.results, ...data],
+          next_page,
+        };
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
   return (
     <main className={commonStyles.container}>
       <div className={styles.posts}>
-        {postsPagination.results.map(post => (
-          <Link href={`/posts/${post.uid}`}>
+        {posts.results.map(post => (
+          <Link href={`/post/${post.uid}`} key={post.uid}>
             <a key={post.uid}>
               <strong>{post.data.title}</strong>
               <p>{post.data.subtitle}</p>
               <div>
                 <div className={styles.info}>
                   <FiCalendar size={20} />
-                  <time>{post.first_publication_date}</time>
+                  <time>
+                    {format(
+                      new Date(post.first_publication_date),
+                      'dd MMM yyyy',
+                      {
+                        locale: ptBR,
+                      }
+                    )}
+                  </time>
                 </div>
                 <div className={styles.info}>
                   <FiUser size={20} />
@@ -53,7 +88,15 @@ export default function Home({ postsPagination }: HomeProps) {
             </a>
           </Link>
         ))}
-        <a className={styles.carregarPosts}>Carregar mais posts</a>
+        {posts.next_page && (
+          <button
+            className="carregarPosts"
+            onClick={handleLoadMorePosts}
+            type="button"
+          >
+            Carregar mais posts
+          </button>
+        )}
       </div>
     </main>
   );
@@ -71,13 +114,7 @@ export const getStaticProps: GetStaticProps = async () => {
   const posts = postsResponse.results.map(post => {
     return {
       uid: post.uid,
-      first_publication_date: format(
-        new Date(post.first_publication_date),
-        'dd MMM yyyy',
-        {
-          locale: ptBR,
-        }
-      ),
+      first_publication_date: post.first_publication_date,
       data: {
         title: post.data.title,
         subtitle: post.data.subtitle,
@@ -87,9 +124,6 @@ export const getStaticProps: GetStaticProps = async () => {
   });
 
   const { next_page } = postsResponse;
-
-  console.log(next_page);
-
   const postsPagination: PostPagination = {
     next_page,
     results: posts,

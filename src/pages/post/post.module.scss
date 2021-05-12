@@ -1,1 +1,41 @@
 // TODO
+.banner {
+  width: 100vw;
+  margin-bottom: 5rem;
+}
+.info {
+  display: flex;
+  font-size: 0.875rem;
+  line-height: 1rem;
+  align-items: center;
+  color: var(--dark-grey);
+  margin-right: 2.5rem;
+  svg {
+    margin-right: 0.625rem;
+  }
+}
+
+
+.post {
+  h1 {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+  }
+
+ 
+}
+
+.infoContainer {
+  margin-bottom: 4rem;
+  display: flex;
+}
+
+.content {
+  margin: 1rem 0;
+  p {
+    & + p {
+      margin-top: 0.5rem;
+    }
+    text-align: justify;
+  }
+}

@@ -2,17 +2,16 @@
 .posts {
   max-width: 720px;
 
+
   div {
     display: flex;
   }
   a {
     display: block;
+    margin-top: 1.5rem;
     > p {
       color: var(--dark-grey);
       margin: 0.5rem 0 1.5rem 0;
-    }
-    & + a {
-      margin-top: 3rem;
     }
     strong {
       font-weight: 700;
