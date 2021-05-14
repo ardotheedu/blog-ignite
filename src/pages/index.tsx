@@ -88,9 +88,10 @@ export default function Home({ postsPagination }: HomeProps) {
             </a>
           </Link>
         ))}
+
         {posts.next_page && (
           <button
-            className="carregarPosts"
+            className={styles.carregarPosts}
             onClick={handleLoadMorePosts}
             type="button"
           >
